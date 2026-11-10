@@ -7,15 +7,15 @@ jobs:
   build-apk:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Download Full Project
+      - name: 1. Download Full v309 Ultimate Project
         run: |
           rm -rf clean_project
           mkdir -p clean_project
-          curl -L -o clean_project/project.zip "https://drive.usercontent.google.com/download?id=1btRpa9RyfonopkwqsytQr4grRAuL5wqV&export=download&confirm=t"
-          unzip -q -o clean_project/project.zip -d clean_project
-          rm -f clean_project/project.zip
-          sed -i '437,438d' clean_project/app/src/main/java/ru/rusia/ohot293/MainActivity.kt
-          sed -i '436a\                    sb.appendLine().append(iface.name).append("|").append(ipList.joinToString(","))' clean_project/app/src/main/java/ru/rusia/ohot293/MainActivity.kt
+          curl -L -o clean_project/base.zip "https://drive.usercontent.google.com/download?id=1btRpa9RyfonopkwqsytQr4grRAuL5wqV&export=download&confirm=t"
+          unzip -q -o clean_project/base.zip -d clean_project
+          curl -L -o clean_project/v309.zip "https://drive.usercontent.google.com/download?id=1LEXBrsuYUY_oL7t5KXfLK6vRs4Z50K1m&export=download&confirm=t"
+          unzip -q -o clean_project/v309.zip -d clean_project
+          rm -f clean_project/base.zip clean_project/v309.zip
 
       - name: 2. Setup Java 17
         uses: actions/setup-java@v4
@@ -35,5 +35,5 @@ jobs:
       - name: 5. Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ohotnik-Rossii-PRO-v308-Native-APK
+          name: Ohotnik-Rossii-PRO-v309-Ultimate-APK
           path: clean_project/app/build/outputs/apk/debug/app-debug.apk
