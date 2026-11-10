@@ -1,0 +1,37 @@
+name: Build Native Ohotnik APK
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Download Full Project
+        run: |
+          rm -rf clean_project
+          mkdir -p clean_project
+          curl -L -o clean_project/project.zip "https://drive.usercontent.google.com/download?id=1btRpa9RyfonopkwqsytQr4grRAuL5wqV&export=download&confirm=t"
+          unzip -q -o clean_project/project.zip -d clean_project
+          rm -f clean_project/project.zip
+
+      - name: 2. Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 3. Setup Gradle 8.7
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: 4. Build Debug APK
+        working-directory: clean_project
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: 5. Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ohotnik-Rossii-PRO-v308-Native-APK
+          path: clean_project/app/build/outputs/apk/debug/app-debug.apk
