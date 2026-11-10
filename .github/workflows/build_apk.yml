@@ -1,39 +1,45 @@
 name: Build Native Ohotnik APK
+
 on:
   push:
     branches: [ "main", "master" ]
   workflow_dispatch:
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Download Full v309 Ultimate Project
-        run: |
-          rm -rf clean_project
-          mkdir -p clean_project
-          curl -L -o clean_project/base.zip "https://drive.usercontent.google.com/download?id=1btRpa9RyfonopkwqsytQr4grRAuL5wqV&export=download&confirm=t"
-          unzip -q -o clean_project/base.zip -d clean_project
-          curl -L -o clean_project/v309.zip "https://drive.usercontent.google.com/download?id=1LEXBrsuYUY_oL7t5KXfLK6vRs4Z50K1m&export=download&confirm=t"
-          unzip -q -o clean_project/v309.zip -d clean_project
-          rm -f clean_project/base.zip clean_project/v309.zip
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: 2. Setup Java 17
+      - name: Download & Extract Ohotnik PRO v309 Real Photos Project
+        run: |
+          echo "Downloading base project..."
+          curl -L "https://drive.google.com/uc?export=download&id=1btRpa9RyfonopkwqsytQr4grRAuL5wqV&confirm=t" -o base_project.zip
+          unzip -o -q base_project.zip
+          rm -f base_project.zip
+          echo "Downloading v309 Real Photos Expansion Pack..."
+          curl -L "https://drive.google.com/uc?export=download&id=1AU0-Fwkm2KV2H8kWZpX0sUIG7OysOCTJ&confirm=t" -o v309_pack.zip
+          unzip -o -q v309_pack.zip
+          rm -f v309_pack.zip
+          ls -la app/src/main/assets/www/photos/ | head -n 30
+
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
 
-      - name: 3. Setup Gradle 8.7
-        uses: gradle/actions/setup-gradle@v4
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.7'
 
-      - name: 4. Build Debug APK
-        working-directory: clean_project
+      - name: Build Debug APK
         run: gradle assembleDebug --no-daemon --stacktrace
 
-      - name: 5. Upload APK Artifact
+      - name: Upload Ready APK
         uses: actions/upload-artifact@v4
         with:
           name: Ohotnik-Rossii-PRO-v309-Ultimate-APK
-          path: clean_project/app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
