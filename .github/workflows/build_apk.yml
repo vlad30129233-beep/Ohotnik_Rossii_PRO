@@ -12,91 +12,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download & Extract v312 Reference Project + Prebundle Real Offline Map Tiles
+      - name: Download & Extract v312 Reference Project
         run: |
-          pip install gdown requests
+          pip install gdown
           if [ ! -f "settings.gradle.kts" ]; then
-            echo "Downloading base Android project..."
             gdown --id 1btRpa9RyfonopkwqsytQr4grRAuL5wqV -O base_project.zip
             unzip -q -o base_project.zip
             rm -f base_project.zip
           fi
-          echo "Downloading v309 photo expansion pack (85 guns, 30 ammo, 55 fauna, 68 med)..."
           gdown --id 1AU0-Fwkm2KV2H8kWZpX0sUIG7OysOCTJ -O v309_pack.zip
           unzip -q -o v309_pack.zip
           rm -f v309_pack.zip
-          echo "Downloading v312 Reference Edition Master Pack (10 3D Themes, Full-Color 3D Icons, HD Splash, Geo Engine)..."
-          gdown --id 1eaKnq_Gv6ahQGeR8IRPsCv3R3WDxmWUH -O v312_master_pack.zip
+          gdown --id 1ecp0P2UKTZfb3W2Z22rBDtfTQmpkntmn -O v312_master_pack.zip
           unzip -q -o v312_master_pack.zip
           rm -f v312_master_pack.zip
-
-          echo "Pre-downloading real OpenStreetMap offline tiles for Russia & Kuzbass into APK assets..."
-          python3 - << 'PYEOF'
-          import os, math, urllib.request
-          from concurrent.futures import ThreadPoolExecutor
-
-          base_dir = "app/src/main/assets/www/tiles"
-          os.makedirs(base_dir, exist_ok=True)
-
-          def latlon_to_xy(z, lat, lon):
-              n = 2 ** z
-              x = int((lon + 180.0) / 360.0 * n)
-              lat_rad = math.radians(lat)
-              y = int((1.0 - math.log(math.tan(lat_rad) + 1.0 / math.cos(lat_rad)) / math.pi) / 2.0 * n)
-              return max(0, min(n - 1, x)), max(0, min(n - 1, y))
-
-          tasks = []
-          # Overview tiles for all of Russia (z = 3..5)
-          for z in range(3, 6):
-              x0, y0 = latlon_to_xy(z, 72.0, 25.0)
-              x1, y1 = latlon_to_xy(z, 42.0, 170.0)
-              for x in range(x0, x1 + 1):
-                  for y in range(y0, y1 + 1):
-                      tasks.append((z, x, y))
-
-          # Siberia, Kuzbass, Altai, Novosibirsk, Khakassia, Krasnoyarsk (z = 6..8)
-          for z in range(6, 9):
-              x0, y0 = latlon_to_xy(z, 57.5, 81.5)
-              x1, y1 = latlon_to_xy(z, 50.5, 93.5)
-              for x in range(x0, x1 + 1):
-                  for y in range(y0, y1 + 1):
-                      tasks.append((z, x, y))
-
-          # High-detail Kemerovo Oblast / Kuzbass hunting grounds (z = 9..10)
-          for z in range(9, 11):
-              x0, y0 = latlon_to_xy(z, 56.6, 84.8)
-              x1, y1 = latlon_to_xy(z, 52.2, 89.4)
-              for x in range(x0, x1 + 1):
-                  for y in range(y0, y1 + 1):
-                      tasks.append((z, x, y))
-
-          def fetch_tile(item):
-              z, x, y = item
-              out_p = f"{base_dir}/{z}/{x}/{y}.png"
-              if os.path.exists(out_p) and os.path.getsize(out_p) > 200:
-                  return
-              os.makedirs(os.path.dirname(out_p), exist_ok=True)
-              urls = [
-                  f"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                  f"https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
-              ]
-              for u in urls:
-                  try:
-                      req = urllib.request.Request(u, headers={"User-Agent": "OhotnikRossiiProNative/312.0"})
-                      with urllib.request.urlopen(req, timeout=6) as resp:
-                          data = resp.read()
-                          if len(data) > 200:
-                              with open(out_p, "wb") as f:
-                                  f.write(data)
-                              return
-                  except Exception:
-                      pass
-
-          print(f"Downloading {len(tasks)} real offline map tiles...")
-          with ThreadPoolExecutor(max_workers=16) as ex:
-              list(ex.map(fetch_tile, tasks))
-          print("Offline tiles bundled successfully!")
-          PYEOF
+          python3 prebundle_osm_tiles.py
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
