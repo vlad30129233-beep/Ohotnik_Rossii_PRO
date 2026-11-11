@@ -12,21 +12,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download & Extract v312 Reference Project
+      - name: Download & Extract v312 Complete Project
         run: |
-          pip install gdown
-          if [ ! -f "settings.gradle.kts" ]; then
-            gdown --id 1btRpa9RyfonopkwqsytQr4grRAuL5wqV -O base_project.zip
-            unzip -q -o base_project.zip
-            rm -f base_project.zip
-          fi
-          gdown --id 1AU0-Fwkm2KV2H8kWZpX0sUIG7OysOCTJ -O v309_pack.zip
-          unzip -q -o v309_pack.zip
-          rm -f v309_pack.zip
-          gdown --id 1ecp0P2UKTZfb3W2Z22rBDtfTQmpkntmn -O v312_master_pack.zip
-          unzip -q -o v312_master_pack.zip
-          rm -f v312_master_pack.zip
-          python3 prebundle_osm_tiles.py
+          pip install -q gdown
+          curl -sL "https://drive.google.com/uc?export=download&id=1hC1BlvR0fyh0__CUAM0QGLpU8k-FJvvO&confirm=t" -o p1.zip
+          unzip -tq p1.zip || gdown --fuzzy "https://drive.google.com/file/d/1hC1BlvR0fyh0__CUAM0QGLpU8k-FJvvO/view" -O p1.zip
+          unzip -q -o p1.zip
+          rm -f p1.zip
+          curl -sL "https://drive.google.com/uc?export=download&id=1A0Rhs4mLmzUDRL8RFOFMHVFkCgWhfiK-&confirm=t" -o p2.zip
+          unzip -tq p2.zip || gdown --fuzzy "https://drive.google.com/file/d/1A0Rhs4mLmzUDRL8RFOFMHVFkCgWhfiK-/view" -O p2.zip
+          unzip -q -o p2.zip
+          rm -f p2.zip
+          curl -sL "https://drive.google.com/uc?export=download&id=11APSiRYAYawoG6LV3BL3AtijdR9EDUR1&confirm=t" -o p3.zip
+          unzip -tq p3.zip || gdown --fuzzy "https://drive.google.com/file/d/11APSiRYAYawoG6LV3BL3AtijdR9EDUR1/view" -O p3.zip
+          unzip -q -o p3.zip
+          rm -f p3.zip
+          python3 prebundle_osm_tiles.py || true
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
