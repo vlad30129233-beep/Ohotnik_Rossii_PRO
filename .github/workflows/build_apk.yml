@@ -12,16 +12,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download & Extract Ohotnik PRO v309 Real Photos Project
+      - name: Download & Extract Ohotnik PRO v310 Master Project
         run: |
           echo "Downloading base project..."
           curl -L "https://drive.google.com/uc?export=download&id=1btRpa9RyfonopkwqsytQr4grRAuL5wqV&confirm=t" -o base_project.zip
           unzip -o -q base_project.zip
           rm -f base_project.zip
-          echo "Downloading v309 Real Photos Expansion Pack..."
-          curl -L "https://drive.google.com/uc?export=download&id=1AU0-Fwkm2KV2H8kWZpX0sUIG7OysOCTJ&confirm=t" -o v309_pack.zip
-          unzip -o -q v309_pack.zip
-          rm -f v309_pack.zip
+          echo "Downloading v310 Master Upgrade Pack..."
+          curl -L "https://drive.google.com/uc?export=download&id=1oHhC2xfmOtCU_-udyWg-sbUVpudXBA3A&confirm=t" -o v310_pack.zip
+          unzip -o -q v310_pack.zip
+          rm -f v310_pack.zip
           ls -la app/src/main/assets/www/photos/ | head -n 30
 
       - name: Set up JDK 17
@@ -41,5 +41,5 @@ jobs:
       - name: Upload Ready APK
         uses: actions/upload-artifact@v4
         with:
-          name: Ohotnik-Rossii-PRO-v309-Ultimate-APK
+          name: Ohotnik-Rossii-PRO-v310-Ultimate-APK
           path: app/build/outputs/apk/debug/app-debug.apk
