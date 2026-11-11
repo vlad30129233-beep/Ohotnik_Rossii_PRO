@@ -12,17 +12,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download & Extract Ohotnik PRO v310 Master Project
+      - name: Download & Extract Ohotnik PRO v311 Perfection Project
         run: |
-          echo "Downloading base project..."
+          echo "1. Downloading base project..."
           curl -L "https://drive.google.com/uc?export=download&id=1btRpa9RyfonopkwqsytQr4grRAuL5wqV&confirm=t" -o base_project.zip
           unzip -o -q base_project.zip
           rm -f base_project.zip
-          echo "Downloading v310 Master Upgrade Pack..."
-          curl -L "https://drive.google.com/uc?export=download&id=1oHhC2xfmOtCU_-udyWg-sbUVpudXBA3A&confirm=t" -o v310_pack.zip
-          unzip -o -q v310_pack.zip
-          rm -f v310_pack.zip
-          ls -la app/src/main/assets/www/photos/ | head -n 30
+          echo "2. Downloading v309 Real Photos Pack..."
+          curl -L "https://drive.google.com/uc?export=download&id=1AU0-Fwkm2KV2H8kWZpX0sUIG7OysOCTJ&confirm=t" -o v309_photos.zip
+          unzip -o -q v309_photos.zip
+          rm -f v309_photos.zip
+          echo "3. Downloading v311 Perfection Pack (HD Video + 10 3D Themes + Offline Map)..."
+          curl -L "https://drive.google.com/uc?export=download&id=1Dc-Fb0plg2fIf_qWdprRmA9KXTYTh4ji&confirm=t" -o v311_pack.zip
+          unzip -o -q v311_pack.zip
+          rm -f v311_pack.zip
+          ls -lh app/src/main/assets/www/splash.mp4
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -41,5 +45,5 @@ jobs:
       - name: Upload Ready APK
         uses: actions/upload-artifact@v4
         with:
-          name: Ohotnik-Rossii-PRO-v310-Ultimate-APK
+          name: Ohotnik-Rossii-PRO-v311-Perfection-APK
           path: app/build/outputs/apk/debug/app-debug.apk
