@@ -2,7 +2,7 @@ name: Build Native Ohotnik APK v316 (Zero-Lag 60FPS + In-Place Update)
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 env:
@@ -10,12 +10,12 @@ env:
 
 jobs:
   build-apk:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: 1. Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download & Extract v316 Zero-Lag Native Project & Assets
+      - name: 2. Download & Extract v316 Zero-Lag Native Project & Assets
         run: |
           python3 - << 'PY'
           import urllib.request, http.cookiejar, re, zipfile, os
@@ -48,9 +48,9 @@ jobs:
               print(f"Downloaded {out_path} ({len(data2)} bytes)")
 
           parts = [
-              ("1HzNKYxJRwrg5p7aGED7vluFhoKdbnHwR", "/tmp/part1.zip"),
               ("19injbZDayHjiaikM27O5pG3LQaoXM_Ox", "/tmp/part2.zip"),
               ("1G_cwpF2PaKojdltClDKvnRJGpaXfj-An", "/tmp/part3.zip"),
+              ("1HzNKYxJRwrg5p7aGED7vluFhoKdbnHwR", "/tmp/part1.zip"),
           ]
           for fid, zpath in parts:
               download_gdrive(fid, zpath)
@@ -75,27 +75,26 @@ jobs:
           print(f"Verified v316 Zero-Lag assets: index.html ({os.path.getsize(html_p)} B), app_bundle.js ({os.path.getsize(bundle_p)} B), splash.mp4 ({os.path.getsize(splash_p)} B)")
           PY
 
-      - name: Set up JDK 17
+      - name: 3. Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: 4. Setup Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: 5. Build In-Place Update APK (v316 Zero-Lag)
+        run: gradle assembleDebug --no-daemon --stacktrace
 
-      - name: Build In-Place Update APK (v316 Zero-Lag)
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Rename APK for Clean Download
+      - name: 6. Rename APK for Clean Download
         run: |
           cp app/build/outputs/apk/debug/app-debug.apk Ohotnik_Rossii_PRO_v316_Ultimate_Update.apk
           ls -lh Ohotnik_Rossii_PRO_v316_Ultimate_Update.apk
 
-      - name: Upload APK Artifact
+      - name: 7. Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Ohotnik-Rossii-PRO-v316-ZeroLag-APK
