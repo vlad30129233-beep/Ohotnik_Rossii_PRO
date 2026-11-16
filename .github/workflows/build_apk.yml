@@ -1,45 +1,51 @@
-name: Build Native Ohotnik APK
+name: Build Native Ohotnik APK v315 (In-Place Update)
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main", "master" ]
-  workflow_dispatch:
 
 jobs:
   build-apk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Download and Extract v313 Project
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Gradle 8.7
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Download and unpack v315 project packages
         run: |
-          pip install -q gdown || pip install --break-system-packages -q gdown
-          curl -sL "https://drive.usercontent.google.com/download?id=1BaYDwfodIPYfaCl1gE08hayaZgRUKJy5&export=download&confirm=t" -o p1.zip
-          unzip -tq p1.zip || gdown --fuzzy "https://drive.google.com/file/d/1BaYDwfodIPYfaCl1gE08hayaZgRUKJy5/view" -O p1.zip
-          unzip -q -o p1.zip
-          rm -f p1.zip
+          python3 -m pip install --upgrade pip gdown
+          curl -sL "https://drive.usercontent.google.com/download?id=11e3IIGxM1_wjuImx-0XIM06T1Hlrkmo0&export=download&confirm=t" -o p1.zip
+          if ! unzip -tq p1.zip >/dev/null 2>&1; then python3 -m gdown --fuzzy "11e3IIGxM1_wjuImx-0XIM06T1Hlrkmo0" -O p1.zip; fi
           curl -sL "https://drive.usercontent.google.com/download?id=19injbZDayHjiaikM27O5pG3LQaoXM_Ox&export=download&confirm=t" -o p2.zip
-          unzip -tq p2.zip || gdown --fuzzy "https://drive.google.com/file/d/19injbZDayHjiaikM27O5pG3LQaoXM_Ox/view" -O p2.zip
-          unzip -q -o p2.zip
-          rm -f p2.zip
+          if ! unzip -tq p2.zip >/dev/null 2>&1; then python3 -m gdown --fuzzy "19injbZDayHjiaikM27O5pG3LQaoXM_Ox" -O p2.zip; fi
           curl -sL "https://drive.usercontent.google.com/download?id=1G_cwpF2PaKojdltClDKvnRJGpaXfj-An&export=download&confirm=t" -o p3.zip
-          unzip -tq p3.zip || gdown --fuzzy "https://drive.google.com/file/d/1G_cwpF2PaKojdltClDKvnRJGpaXfj-An/view" -O p3.zip
-          unzip -q -o p3.zip
-          rm -f p3.zip
-          python3 prebundle_osm_tiles.py || true
+          if ! unzip -tq p3.zip >/dev/null 2>&1; then python3 -m gdown --fuzzy "1G_cwpF2PaKojdltClDKvnRJGpaXfj-An" -O p3.zip; fi
+          unzip -oq p1.zip
+          unzip -oq p2.zip
+          unzip -oq p3.zip
+          rm -f p1.zip p2.zip p3.zip
+          mkdir -p ~/.android
+          if [ -f app/ohotnik_fixed.keystore ]; then cp -f app/ohotnik_fixed.keystore ~/.android/debug.keystore; fi
 
-      - uses: actions/setup-java@v4
+      - name: Build In-Place Update APK (v315)
+        run: |
+          gradle assembleDebug --no-daemon --stacktrace
+          cp app/build/outputs/apk/debug/app-debug.apk Ohotnik_Rossii_PRO_v315_Update_InPlace.apk
+
+      - name: Upload Ready APK Artifact
+        uses: actions/upload-artifact@v4
         with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.7"
-
-      - run: gradle assembleDebug --no-daemon --stacktrace
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Ohotnik_Rossii_PRO_v313_Reference_Edition_APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: Ohotnik-Rossii-PRO-v315-Update-APK
+          path: Ohotnik_Rossii_PRO_v315_Update_InPlace.apk
