@@ -1,4 +1,4 @@
-name: Build Native Ohotnik APK v316 (Zero-Lag 60FPS + In-Place Update)
+name: Build Native Ohotnik APK v317 (Native 60FPS Video + Full UI Restored)
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       - name: 1. Checkout repository
         uses: actions/checkout@v4
 
-      - name: 2. Download & Extract v316 Zero-Lag Native Project & Assets
+      - name: 2. Download & Extract v317 Native Project & Assets
         run: |
           python3 - << 'PY'
           import urllib.request, http.cookiejar, re, zipfile, os
@@ -47,10 +47,13 @@ jobs:
                   f.write(data2)
               print(f"Downloaded {out_path} ({len(data2)} bytes)")
 
+          if os.path.exists("app/src/main/assets/www/app_bundle.js"):
+              os.remove("app/src/main/assets/www/app_bundle.js")
+
           parts = [
               ("19injbZDayHjiaikM27O5pG3LQaoXM_Ox", "/tmp/part2.zip"),
               ("1G_cwpF2PaKojdltClDKvnRJGpaXfj-An", "/tmp/part3.zip"),
-              ("1HzNKYxJRwrg5p7aGED7vluFhoKdbnHwR", "/tmp/part1.zip"),
+              ("1rrRzwK2tRRww7lAZoEeaPUBlPHrYg0g-", "/tmp/part1.zip"),
           ]
           for fid, zpath in parts:
               download_gdrive(fid, zpath)
@@ -59,20 +62,20 @@ jobs:
               os.remove(zpath)
 
           html_p = "app/src/main/assets/www/index.html"
-          bundle_p = "app/src/main/assets/www/app_bundle.js"
           splash_p = "app/src/main/assets/www/splash.mp4"
           keystore_p = "app/ohotnik_fixed.keystore"
+          ma_p = "app/src/main/java/ru/rusia/ohot293/MainActivity.kt"
 
           assert os.path.exists(html_p), "index.html missing!"
-          assert os.path.exists(bundle_p), "app_bundle.js missing!"
           assert os.path.exists(splash_p), "splash.mp4 missing!"
           assert os.path.exists(keystore_p), "ohotnik_fixed.keystore missing!"
+          assert os.path.exists(ma_p), "MainActivity.kt missing!"
 
-          with open(bundle_p, "r", encoding="utf-8") as f:
-              b = f.read()
-          assert "ensureTabRenderedV316" in b, "v316 Zero-Lag coordinator missing!"
-          assert "V315_SURVIVAL_DB" in b and "tlh_25" in b, "v315 survival expansion missing!"
-          print(f"Verified v316 Zero-Lag assets: index.html ({os.path.getsize(html_p)} B), app_bundle.js ({os.path.getsize(bundle_p)} B), splash.mp4 ({os.path.getsize(splash_p)} B)")
+          with open(html_p, "r", encoding="utf-8") as f:
+              h = f.read()
+          assert "v317-ui-and-keypad-safeguard-css" in h, "v317 UI safeguard missing!"
+          assert "V315_SURVIVAL_DB" in h and "tlh_25" in h, "v315 survival expansion missing!"
+          print(f"Verified v317 assets: index.html ({os.path.getsize(html_p)} B), splash.mp4 ({os.path.getsize(splash_p)} B)")
           PY
 
       - name: 3. Set up JDK 17
@@ -86,16 +89,16 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: 5. Build In-Place Update APK (v316 Zero-Lag)
+      - name: 5. Build In-Place Update APK (v317 Native Splash 60FPS)
         run: gradle assembleDebug --no-daemon --stacktrace
 
       - name: 6. Rename APK for Clean Download
         run: |
-          cp app/build/outputs/apk/debug/app-debug.apk Ohotnik_Rossii_PRO_v316_Ultimate_Update.apk
-          ls -lh Ohotnik_Rossii_PRO_v316_Ultimate_Update.apk
+          cp app/build/outputs/apk/debug/app-debug.apk Ohotnik_Rossii_PRO_v317_Ultimate_Update.apk
+          ls -lh Ohotnik_Rossii_PRO_v317_Ultimate_Update.apk
 
       - name: 7. Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ohotnik-Rossii-PRO-v316-ZeroLag-APK
-          path: Ohotnik_Rossii_PRO_v316_Ultimate_Update.apk
+          name: Ohotnik-Rossii-PRO-v317-Native60FPS-APK
+          path: Ohotnik_Rossii_PRO_v317_Ultimate_Update.apk
